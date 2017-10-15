@@ -1,5 +1,7 @@
 package com.github.gabehamilton.jmeter;
 
+import java.util.Objects;
+
 /**
  * Created by gabe on 1/27/15.
  *
@@ -13,11 +15,34 @@ public class SpockMethod {
 
 	public SpockMethod(String methodName, String specName)
 	{
-		this.methodName = methodName; this.specName = specName;
+		this.methodName = methodName;
+		this.specName = specName;
 	}
 
 	/** What to display in JComboBox */
 	public String toString(){return specName;}
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this) return true;
+		if (!(o instanceof SpockMethod)) {
+			return false;
+		}
+		SpockMethod other = (SpockMethod) o;
+		if (other != null) {
+			if (this.methodName != null) {
+				return this.methodName.equals(other.getMethodName());
+			}else if (this.specName != null) {
+				return this.specName.equals(other.getSpecName());
+			} else
+				return false;
+		} else
+			return false;
+	}
+	@Override
+	public int hashCode() {
+		return Objects.hash(methodName, specName);
+	}
 
 
 	public String getMethodName() {

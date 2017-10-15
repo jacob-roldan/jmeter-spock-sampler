@@ -83,10 +83,10 @@ public class SpockSpecificationFilter extends Filter
 	{
 		MethodInfo methodInfo = NOT_FOUND;
 		if("setup".equalsIgnoreCase(featureMethodName)) {
-			return currentSpec.getSetupMethod();
+			return currentSpec.getSetupMethods().get(0);
 		}
 		if("cleanup".equalsIgnoreCase(featureMethodName)) {
-			return currentSpec.getCleanupMethod();
+			return currentSpec.getCleanupMethods().get(0);
 		}
 		for (FeatureInfo feature : currentSpec.getAllFeatures())
 		{

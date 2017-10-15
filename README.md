@@ -1,6 +1,8 @@
 # jmeter-spock-sampler
 Run Spock specs in JMeter
 
+Jacob: - Updated for Jmeter 3.3
+
 ## Status
 Spock Sampler runs Spock Specs in JMeter
 

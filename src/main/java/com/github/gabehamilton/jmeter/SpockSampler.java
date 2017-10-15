@@ -53,7 +53,8 @@ import java.util.Iterator;
  * @see org.apache.jmeter.protocol.java.sampler.JunitSampler
  * @link http://svn.apache.org/repos/asf/jmeter/trunk/src/junit/org/apache/jmeter/protocol/java/sampler/JUnitSampler.java
  */
-public class SpockSampler extends AbstractSampler implements ThreadListener {
+public class SpockSampler extends AbstractSampler implements ThreadListener
+{
 
     private static final Logger log = LoggingManager.getLoggerForClass();
 
@@ -91,16 +92,20 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
 
     // The method name to be invoked
     private transient String methodName;
+    private transient String specName;
     // The name of the class containing the method
     private transient String className;
 
-    public SpockSampler(){
+    public SpockSampler()
+    {
         super();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public SampleResult sample(Entry entry) {
+    /**
+     * {@inheritDoc}
+     */
+    public SampleResult sample(Entry entry)
+    {
         if(getCreateOneInstancePerSample()) {
             initializeTestObject();
         }
@@ -128,6 +133,11 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
                 log.info("Running " + spec.getClass().getName() + "." + methodName);
                 result = SpockSpecRunner.execute(spec.getClass(), methodName);
 
+                for (Failure f : result.getFailures()) {
+                    System.out.println(f.getDescription());
+                    f.getException().printStackTrace();
+
+                }
                 // todo avoid calling setUp and tearDown.
                 // Doing that will result in calling
                 // the setUp and tearDown method twice and the elapsed time
@@ -136,16 +146,12 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
                 if (tearDownMethod != null){
                     tearDownMethod.invoke(testCase,new Object[0]);
                 }
-            }
-
-            catch(InitializationError ie) {
+            } catch (InitializationError ie) {
                 throw new RuntimeException(ie);
-            }
-            catch(NoTestsRemainException ntre) {
+            } catch (NoTestsRemainException ntre) {
                 log.error("No tests remain:: " + ntre.getMessage());
-            }
-
-            catch (InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
                 Throwable cause = e.getCause();
                 if (cause instanceof AssertionFailedError){
 //                  tr.addFailure(spec, (AssertionFailedError) cause); //  todo with Result
@@ -161,9 +167,13 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
 //                  tr.addError(spec, e); // todo with Result
                 }
             } catch (IllegalAccessException e) {
+                e.printStackTrace();
 //              tr.addError(spec, e);   // todo with Result
             } catch (IllegalArgumentException e) {
+                e.printStackTrace();
 //              tr.addError(spec, e);  // todo with Result
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             if (result == null || !result.wasSuccessful() ){
                 sresult.setSuccessful(false);
@@ -227,7 +237,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * Method tries to get the setUp and tearDown method for the class
      * @param testCase
      */
-    private void initMethodObjects(Object testCase){
+    private void initMethodObjects(Object testCase)
+    {
         setUpMethod = null;
         tearDownMethod = null;
         if (!getDoNotSetUpTearDown()) {
@@ -279,7 +290,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
     /**
      * @return the name of the method to test
      */
-    public String getMethod(){
+    public String getMethod()
+    {
         return getPropertyAsString(METHOD);
     }
 
@@ -288,14 +300,42 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * the end, since the sequence matters.
      * @param methodName name of the method to test
      */
-    public void setMethod(String methodName){
-        setProperty(METHOD,methodName);
+    public void setMethod(String methodName)
+    {
+        setProperty(METHOD, methodName);
     }
 
+    public void setSpecName (String specName)
+    {
+        this.specName = specName;
+    }
+
+    public String getSpecName ()
+    {
+        return specName;
+    }
+
+
+    public void setSpockMethod (SpockMethod sm)
+    {
+        if (sm != null) {
+            setMethod(sm.getMethodName());
+            setSpecName(sm.getSpecName());
+        } else {
+            setMethod(null);
+            setSpecName(null);
+        }
+    }
+
+    public SpockMethod getSpockMethod()
+    {
+        return new SpockMethod(getMethod(),getSpecName());
+    }
     /**
      * @return the success message
      */
-    public String getSuccess(){
+    public String getSuccess()
+    {
         String value = getPropertyAsString(SUCCESS);
         if("".equals(value))
             value = "successful";
@@ -306,14 +346,16 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * set the success message
      * @param success message to be used for success
      */
-    public void setSuccess(String success){
+    public void setSuccess(String success)
+    {
         setProperty(SUCCESS,success);
     }
 
     /**
      * @return the success code defined by the user
      */
-    public String getSuccessCode(){
+    public String getSuccessCode()
+    {
         String value = getPropertyAsString(SUCCESSCODE);
         if("".equals(value))
             value = "1000";
@@ -325,14 +367,16 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * be unique.
      * @param code unique success code
      */
-    public void setSuccessCode(String code){
+    public void setSuccessCode(String code)
+    {
         setProperty(SUCCESSCODE,code);
     }
 
     /**
      * @return the failure message
      */
-    public String getFailure(){
+    public String getFailure()
+    {
         String value = getPropertyAsString(FAILURE);
         if("".equals(value))
             value = "failed";
@@ -343,14 +387,16 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * set the failure message
      * @param fail the failure message
      */
-    public void setFailure(String fail){
+    public void setFailure(String fail)
+    {
         setProperty(FAILURE,fail);
     }
 
     /**
      * @return The failure code that is used by other components
      */
-    public String getFailureCode(){
+    public String getFailureCode()
+    {
         String value = getPropertyAsString(FAILURECODE);
         if("".equals(value))
             value = "0001";
@@ -361,14 +407,16 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * Provide some unique code to denote a type of failure
      * @param code unique code to denote the type of failure
      */
-    public void setFailureCode(String code){
+    public void setFailureCode(String code)
+    {
         setProperty(FAILURECODE,code);
     }
 
     /**
      * @return the descriptive error for the test
      */
-    public String getError(){
+    public String getError()
+    {
         String value = getPropertyAsString(ERROR);
         if("".equals(value))
             value = "An unexpected error occurred";
@@ -382,7 +430,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * <a href="http://junit.sourceforge.net/doc/faq/faq.htm#tests_9">junit faq</a>
      * @param error the description of the error
      */
-    public void setError(String error){
+    public void setError(String error)
+    {
         setProperty(ERROR,error);
     }
 
@@ -390,7 +439,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * @return the error code for the test method. It should
      * be an unique error code.
      */
-    public String getErrorCode(){
+    public String getErrorCode()
+    {
         String value = getPropertyAsString(ERRORCODE);
         if("".equals(value))
             value = "9999";
@@ -402,14 +452,16 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * does not pass the assert test.
      * @param code unique error code
      */
-    public void setErrorCode(String code){
+    public void setErrorCode(String code)
+    {
         setProperty(ERRORCODE,code);
     }
 
     /**
      * @return the comma separated string for the filter
      */
-    public String getFilterString(){
+    public String getFilterString()
+    {
         return getPropertyAsString(FILTER);
     }
 
@@ -417,7 +469,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * set the filter string in comma separated format
      * @param text comma separated filter
      */
-    public void setFilterString(String text){
+    public void setFilterString(String text)
+    {
         setProperty(FILTER,text);
     }
 
@@ -428,7 +481,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @return flag whether setup/teardown methods should not be called
      */
-    public boolean getDoNotSetUpTearDown(){
+    public boolean getDoNotSetUpTearDown()
+    {
         return getPropertyAsBoolean(DOSETUP);
     }
 
@@ -437,7 +491,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @param setup flag whether the setup/teardown methods should not be called
      */
-    public void setDoNotSetUpTearDown(boolean setup){
+    public void setDoNotSetUpTearDown(boolean setup)
+    {
         setProperty(DOSETUP,String.valueOf(setup));
     }
 
@@ -449,7 +504,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @return flag whether errors should be appended
      */
-    public boolean getAppendError() {
+    public boolean getAppendError()
+    {
         return getPropertyAsBoolean(APPEND_ERROR,false);
     }
 
@@ -458,7 +514,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @param error the setting to apply
      */
-    public void setAppendError(boolean error) {
+    public void setAppendError(boolean error)
+    {
         setProperty(APPEND_ERROR,String.valueOf(error));
     }
 
@@ -469,7 +526,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @return flag whether exceptions should be appended to the result tree
      */
-    public boolean getAppendException() {
+    public boolean getAppendException()
+    {
         return getPropertyAsBoolean(APPEND_EXCEPTION,false);
     }
 
@@ -478,7 +536,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @param exc the setting to apply.
      */
-    public void setAppendException(boolean exc) {
+    public void setAppendException(boolean exc)
+    {
         setProperty(APPEND_EXCEPTION,String.valueOf(exc));
     }
 
@@ -487,7 +546,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * class, it returns null and logs all the exceptions at
      * warning level.
      */
-    private static Object getClassInstance(String className, String label){
+    private static Object getClassInstance(String className, String label)
+    {
         Object testclass = null;
         if (className != null){
             Constructor<?> con = null;
@@ -496,8 +556,7 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
             Object[] strParams = null;
             Object[] params = null;
 
-            try
-            {
+            try {
                 theclazz =
                         Thread.currentThread().getContextClassLoader().loadClass(className.trim());
             } catch (ClassNotFoundException e) {
@@ -562,7 +621,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * @return the method or null if an error occurred
      * (or either parameter is null)
      */
-    private Method getMethod(Object clazz, String method){
+    private Method getMethod(Object clazz, String method)
+    {
         if (clazz != null && method != null){
             try {
                 return clazz.getClass().getMethod(method,new Class[0]);
@@ -573,7 +633,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
         return null;
     }
 
-    private Method getMethodWithAnnotation(Object clazz, Class<? extends Annotation> annotation) {
+    private Method getMethodWithAnnotation(Object clazz, Class<? extends Annotation> annotation)
+    {
         if(null != clazz && null != annotation) {
             for(Method m : clazz.getClass().getMethods()) {
                 if(m.isAnnotationPresent(annotation)) {
@@ -584,15 +645,15 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
         return null;
     }
 
-    @Override
-    public void threadFinished() {
+    public void threadFinished()
+    {
     }
 
     /**
      * Set up all variables that don't change between samples.
      */
-    @Override
-    public void threadStarted() {
+    public void threadStarted()
+    {
         testCase = null;
         methodName = getMethod();
         className = getClassname();
@@ -606,7 +667,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
     /**
      * Initialize test object
      */
-    private void initializeTestObject() {
+    private void initializeTestObject()
+    {
         String rlabel = getConstructorString();
         if (rlabel.length()== 0) {
             rlabel = SpockSampler.class.getName();
@@ -623,7 +685,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      * @param createOneInstancePerSample
      *            flag whether a new instance for each call should be created
      */
-    public void setCreateOneInstancePerSample(boolean createOneInstancePerSample) {
+    public void setCreateOneInstancePerSample(boolean createOneInstancePerSample)
+    {
         this.setProperty(CREATE_INSTANCE_PER_SAMPLE, createOneInstancePerSample, CREATE_INSTANCE_PER_SAMPLE_DEFAULT);
     }
 
@@ -631,7 +694,8 @@ public class SpockSampler extends AbstractSampler implements ThreadListener {
      *
      * @return boolean create New Instance For Each Call
      */
-    public boolean getCreateOneInstancePerSample() {
+    public boolean getCreateOneInstancePerSample()
+    {
         return getPropertyAsBoolean(CREATE_INSTANCE_PER_SAMPLE, CREATE_INSTANCE_PER_SAMPLE_DEFAULT);
     }
 }

@@ -150,13 +150,17 @@ public class SpockSamplerGui extends AbstractSamplerGui
     }
 
     @Override
-    public String getStaticLabel() {
+    public String getStaticLabel()
+    {
         ResourceBundle rb = ResourceBundle.getBundle("com.github.gabehamilton.jmeter.SpockSamplerResources", Locale.getDefault());
         return rb.getString(this.getLabelResource());
     }
 
-    @Override
-    public String getLabelResource() { return "sampler_name"; }//$NON-NLS-1$
+
+    public String getLabelResource()
+    {
+        return "sampler_name";
+    }//$NON-NLS-1$
 
     /**
      * Initialize the GUI components and layout.
@@ -173,11 +177,11 @@ public class SpockSamplerGui extends AbstractSamplerGui
     }
 
     @SuppressWarnings("unchecked")
-    private void setupClasslist(){
+    private void setupClasslist()
+    {
         classnameCombo.removeAllItems();
         methodName.removeAllItems();
-        try
-        {
+        try {
             List<String> classList;
             classList = ClassFinder.findClassesThatExtend(SPATHS, new Class [] {Specification.class});
             ClassFilter filter = new ClassFilter();
@@ -187,9 +191,7 @@ public class SpockSamplerGui extends AbstractSamplerGui
             for (int idx=0; idx < clist.length; idx++) {
                 classnameCombo.addItem(clist[idx]);
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             log.error("Exception getting interfaces.", e);
         }
     }
@@ -235,7 +237,8 @@ public class SpockSamplerGui extends AbstractSamplerGui
         return panel;
     }
 
-    private void initGui(){
+    private void initGui()
+    {
         appendError.setSelected(false);
         appendExc.setSelected(false);
         createInstancePerSample.setSelected(false);
@@ -252,13 +255,15 @@ public class SpockSamplerGui extends AbstractSamplerGui
 
     /** {@inheritDoc} */
     @Override
-    public void clearGui() {
+    public void clearGui()
+    {
         super.clearGui();
         initGui();
     }
 
-    /** {@inheritDoc} */
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public TestElement createTestElement()
     {
         SpockSampler sampler = new SpockSampler();
@@ -266,24 +271,23 @@ public class SpockSamplerGui extends AbstractSamplerGui
         return sampler;
     }
 
-    /** {@inheritDoc} */
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public void modifyTestElement(TestElement el)
     {
         SpockSampler sampler = (SpockSampler)el;
         configureTestElement(sampler);
-        if (classnameCombo.getSelectedItem() != null &&
-                classnameCombo.getSelectedItem() instanceof String) {
+        if (classnameCombo.getSelectedItem() != null &&  classnameCombo.getSelectedItem() instanceof String) {
             sampler.setClassname((String)classnameCombo.getSelectedItem());
         } else {
             sampler.setClassname(null);
         }
         sampler.setConstructorString(constructorLabel.getText());
         if (methodName.getSelectedItem() != null) {
-            String mobj = ((SpockMethod)methodName.getSelectedItem()).getMethodName();
-            sampler.setMethod(mobj);
+            sampler.setSpockMethod((SpockMethod) methodName.getSelectedItem());
         } else {
-            sampler.setMethod(null);
+            sampler.setSpockMethod(null);
         }
         sampler.setFilterString(filterpkg.getText());
         sampler.setSuccess(successMsg.getText());
@@ -307,7 +311,7 @@ public class SpockSamplerGui extends AbstractSamplerGui
         filterpkg.setText(sampler.getFilterString());
         classnameCombo.setSelectedItem(sampler.getClassname());
         setupMethods();
-        methodName.setSelectedItem(sampler.getMethod());
+        methodName.setSelectedItem(sampler.getSpockMethod());
         constructorLabel.setText(sampler.getConstructorString());
         if (sampler.getSuccessCode().length() > 0) {
             successCode.setText(sampler.getSuccessCode());
@@ -345,9 +349,9 @@ public class SpockSamplerGui extends AbstractSamplerGui
         createInstancePerSample.setSelected(sampler.getCreateOneInstancePerSample());
     }
 
-    private void setupMethods(){
-        String className =
-                ((String) classnameCombo.getSelectedItem());
+    private void setupMethods()
+    {
+        String className = ((String) classnameCombo.getSelectedItem());
         methodName.removeAllItems();
         if (className != null) {
             try {
@@ -360,6 +364,7 @@ public class SpockSamplerGui extends AbstractSamplerGui
                 }
                 methodName.repaint();
             } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -393,11 +398,10 @@ public class SpockSamplerGui extends AbstractSamplerGui
      *
      * @param evt  the ActionEvent to be handled
      */
-    @Override
+
     public void actionPerformed(ActionEvent evt)
     {
-        if (evt.getSource() == classnameCombo)
-        {
+        if (evt.getSource() == classnameCombo) {
             setupMethods();
         }
     }
@@ -406,8 +410,8 @@ public class SpockSamplerGui extends AbstractSamplerGui
      * Handle change events: currently handles events for the JUnit4
      * checkbox, and sets up the relevant class names.
      */
-    @Override
-    public void itemStateChanged(ItemEvent event) {
+    public void itemStateChanged(ItemEvent event)
+    {
 //        if (event.getItem() == junit4){
 //            setupClasslist();
 //        }
@@ -417,8 +421,9 @@ public class SpockSamplerGui extends AbstractSamplerGui
      * the current implementation checks to see if the source
      * of the event is the filterpkg field.
      */
-    @Override
-    public void stateChanged(ChangeEvent event) {
+
+    public void stateChanged(ChangeEvent event)
+    {
         if ( event.getSource() == filterpkg) {
             setupClasslist();
         }

@@ -20,7 +20,8 @@ public class SpockSpecRunner {
     public static Result execute(final Class<?> classOfspecToRun) throws InitializationError, NoTestsRemainException {
         return SpockSpecRunner.execute(classOfspecToRun, null);
     }
-    public static Result execute(final Class<?> classOfspecToRun, final String methodName) throws InitializationError, NoTestsRemainException {
+    public static Result execute(final Class<?> classOfspecToRun, final String methodName) throws InitializationError, NoTestsRemainException
+    {
 
         final Result testResult = new Result();
 
